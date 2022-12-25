@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33110.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Artemis.Plugins.Modules.LogiStats", "Artemis.Plugins.Modules.LogiStats\Artemis.Plugins.Modules.LogiStats.csproj", "{AD2EA25A-B37C-4CA7-B53E-1839619AC7AF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AD2EA25A-B37C-4CA7-B53E-1839619AC7AF}.Debug|x64.ActiveCfg = Debug|x64
+		{AD2EA25A-B37C-4CA7-B53E-1839619AC7AF}.Debug|x64.Build.0 = Debug|x64
+		{AD2EA25A-B37C-4CA7-B53E-1839619AC7AF}.Release|x64.ActiveCfg = Release|x64
+		{AD2EA25A-B37C-4CA7-B53E-1839619AC7AF}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C0624F28-36EB-4100-871C-E218A2BEE8D7}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,15 @@
+{
+    "Guid": "51950AEB-C628-4AF1-BDE3-6E83A5854088",
+    "Name": "LogiStats",
+    "Description": "Get Logitech gear info",
+    "Author": "Th3Ant",
+    "Website": "",
+    "Repository": "",
+    "Icon": "QuestionMark",
+    "Version": "1.0.0.0",
+    "Main": "Artemis.Plugins.Modules.LogiStats.dll",
+    "AutoEnableProperties": true,
+    "RequiresAdmin": false,
+    "Platforms": "Windows,Linux,OSX",
+    "Api": "1.0.0"
+}

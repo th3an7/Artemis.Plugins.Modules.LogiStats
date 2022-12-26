@@ -10,8 +10,9 @@ namespace Artemis.Plugins.Modules.LogiStats.DataModels
 {
     public class LogiStatsDataModel : DataModel
     {
-        public Root dataModelJson {get; set;}
+        public Root dataModelJson { get; set; }
     }
+
     public class Application
     {
         public string applicationId { get; set; }
@@ -66,6 +67,14 @@ namespace Artemis.Plugins.Modules.LogiStats.DataModels
 
     public class BatteryWarning
     {
+        public BatteryWarning(string deviceId, string level, int percentage, string time)
+        {
+            this.deviceId = deviceId;
+            this.level = level;
+            this.percentage = percentage;
+            this.time = time;
+        }
+        
         public string deviceId { get; set; }
         public string level { get; set; }
         public int percentage { get; set; }
@@ -334,16 +343,21 @@ namespace Artemis.Plugins.Modules.LogiStats.DataModels
         //public BatteryPercentage batterypercentage { get; set; }
 
         [JsonExtensionData]
-        public Dictionary<object, dynamic> _additionalData = new Dictionary<object, dynamic>();//{ get; set; }
-        public BatteryWarning batterywarning { get; set; }
+        public Dictionary<object, object> _additionalData = new Dictionary<object, object>();//{ get; set; }
+        //public Dictionary<dynamic, BatteryWarning> battery = new Dictionary<object, BatteryWarning>();
+        public BatteryWarning battery { get; set; }
 
         [OnDeserialized]
         public void OnDeserialized(StreamingContext context)
         {
             var knownListIds = devicesknown.knownList.ToArray();
             foreach (dynamic modelId in knownListIds) {
-                dynamic edited = modelId.modelId.Replace("_", "");
-                object exists = (_additionalData.TryGetValue($"battery/{modelId.modelId}/warning", out edited) ? _additionalData[edited] : null);
+                dynamic edited = $"battery/{modelId.modelId.Replace("_", "")}/warning";
+                if ((_additionalData.TryGetValue($"battery/{modelId.modelId}/warning", out edited)) == true) {
+                    var removingBrackets = edited.ToString();
+                    removingBrackets = removingBrackets.Substring(0, removingBrackets.Length);
+                    battery = JsonConvert.DeserializeObject<BatteryWarning>(removingBrackets);
+                }
             }
         }
 

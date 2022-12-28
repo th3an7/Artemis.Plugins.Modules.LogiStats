@@ -21,4 +21,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
+          name: Artemis.Plugins.Modules.LogiStats
           path: src/Artemis.Plugins.Modules.LogiStats/bin/x64/Release/net6.0/publish

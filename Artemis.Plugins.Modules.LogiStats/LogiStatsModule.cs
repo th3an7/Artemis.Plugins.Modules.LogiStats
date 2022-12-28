@@ -1,83 +1,145 @@
-using Artemis.Core;
 using Artemis.Core.Modules;
 using Artemis.Plugins.Modules.LogiStats.DataModels;
-using System.Collections.Generic;
+using HidSharp.Reports.Units;
 using Microsoft.Data.Sqlite;
-using System;
-using System.IO;
-using Serilog;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Serilog;
+using Swan;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
-namespace Artemis.Plugins.Modules.LogiStats
+namespace Artemis.Plugins.Modules.LogiStats;
+
+public class LogiStatsModule : Module<LogiStatsDataModel>
 {
-    public class LogiStatsModule : Module<LogiStatsDataModel>
+    public override List<IModuleActivationRequirement> ActivationRequirements { get; } = new();
+
+    private static readonly string LGHUB_PATH = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "LGHUB");
+    private const string DB_FILE = "settings.db";
+    private readonly ILogger _logger;
+    private FileSystemWatcher? watcher;
+
+    public LogiStatsModule(ILogger logger)
     {
-        public readonly ILogger _logger;
-        public override List<IModuleActivationRequirement> ActivationRequirements { get; } = new();
-        string dbPath = (Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) + @"\LGHUB\settings.db";
-        string lghubPath = (Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)) + @"\LGHUB\";
-        FileSystemWatcher watcher;
+        _logger = logger;
+    }
 
-        public override void ModuleActivated(bool isOverride)
+    public override void ModuleActivated(bool isOverride)
+    {
+
+    }
+
+    public override void ModuleDeactivated(bool isOverride)
+    {
+    }
+
+    public override void Enable()
+    {
+        ReadDatabase(null, null);
+
+        watcher = new FileSystemWatcher()
         {
+            Path = LGHUB_PATH,
+            NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.Attributes,
+            Filter = DB_FILE,
+            EnableRaisingEvents = true
+        };
 
-        }
+        watcher.Changed += ReadDatabase;
+    }
 
-        public override void ModuleDeactivated(bool isOverride)
+    public override void Disable()
+    {
+
+    }
+
+    public override void Update(double deltaTime)
+    {
+
+    }
+
+    public void ReadDatabase(object sender, FileSystemEventArgs args)
+    {
+        try
         {
-        }
+            var json = ReadJsonFromDb();
+            if (json is null)
+                return;
 
-        public override void Enable()
-        {
-            watcher = new FileSystemWatcher()
+            var jObject = JsonConvert.DeserializeObject<JObject>(json);
+            if (jObject is null)
+                return;
+
+            var batteryData = jObject.Properties()
+                                     .Where(p => p.Name.StartsWith("battery/"))
+                                     .OrderBy(p => p.Name)
+                                     .ToList();
+
+            var percentages = batteryData
+                .Where(p => p.Name.EndsWith("percentage"))
+                .Select(j => (j.Name, j.Value.ToObject<BatteryPercentage>()));
+
+            foreach (var batteryPercentage in percentages)
             {
-                Path = lghubPath,
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.LastAccess | NotifyFilters.Attributes,
-                Filter = "*.db",
-                EnableRaisingEvents = true
-            };
+                var name = batteryPercentage.Name.Slice("battery/".Length, batteryPercentage.Name.Length - "/percentage".Length - 1);
+                if (!DataModel.Devices.TryGetDynamicChild<DeviceBatteryDataModel>(batteryPercentage.Name, out var dm))
+                    dm = DataModel.Devices.AddDynamicChild<DeviceBatteryDataModel>(batteryPercentage.Name, new(), name);
 
-            watcher.Changed += ReadDatabase;
+                if (batteryPercentage.Item2 is null)
+                    continue;
+
+                dm.Value.Percentage = batteryPercentage.Item2.Percentage;
+                dm.Value.Charging = batteryPercentage.Item2.IsCharging;
+                dm.Value.Millivolts = batteryPercentage.Item2.Millivolts;
+            }
         }
-
-        public LogiStatsModule(ILogger logger)
+        catch (Exception e)
         {
-            _logger = logger;
+            _logger.Error(e, "Error updating from database");
         }
+    }
 
-        public void ReadDatabase(object sender, FileSystemEventArgs e)
-        {
-            using (var connection = new SqliteConnection(@"Data Source = " + dbPath))
-            {
-                connection.Open();
+    private static string? ReadJsonFromDb()
+    {
+        using var connection = new SqliteConnection(@"Data Source = " + Path.Combine(LGHUB_PATH, DB_FILE));
+        connection.Open();
 
-                var command = connection.CreateCommand();
-                command.CommandText =
-                    @"
+        var command = connection.CreateCommand();
+        command.CommandText =
+            @"
                     SELECT file
                     FROM data
                     ";
 
-                using (var reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        var json = reader.GetString(0);
-                        Root dataModelJson = JsonConvert.DeserializeObject<Root>(json);
-                        DataModel.dataModelJson = dataModelJson;
-                    }
-                }
-            }
-        }
+        using var reader = command.ExecuteReader();
+        if (!reader.Read())
+            return null;
 
-        public override void Disable()
-        {
-
-        }
-
-        public override void Update(double deltaTime)
-        {
-
-        }
+        return reader.GetString(0);
     }
+}
+
+public class BatteryWarning
+{
+    public string DeviceId { get; set; }
+
+    public string Level { get; set; }
+
+    public float Percentage { get; set; }
+
+    public string Time { get; set; }
+}
+
+public class BatteryPercentage
+{
+    public bool IsCharging { get; set; }
+
+    public float Millivolts { get; set; }
+
+    public float Percentage { get; set; }
+
+    public DateTime Time { get; set; }
 }

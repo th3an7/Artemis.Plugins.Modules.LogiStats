@@ -10,6 +10,6 @@
     "Main": "Artemis.Plugins.Modules.LogiStats.dll",
     "AutoEnableProperties": true,
     "RequiresAdmin": false,
-    "Platforms": "Windows,Linux,OSX",
+    "Platforms": "Windows",
     "Api": "1.0.0"
 }

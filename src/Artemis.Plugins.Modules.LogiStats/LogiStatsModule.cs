@@ -1,6 +1,5 @@
 using Artemis.Core.Modules;
 using Artemis.Plugins.Modules.LogiStats.DataModels;
-using HidSharp.Reports.Units;
 using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

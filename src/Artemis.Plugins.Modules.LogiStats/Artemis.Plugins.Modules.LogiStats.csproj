@@ -7,12 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ArtemisRGB.UI.Shared" IncludeAssets="compile;build;buildTransitive" Version="1.2023.410.9" />
+        <PackageReference Include="ArtemisRGB.UI.Shared" IncludeAssets="compile;build;buildTransitive" Version="1.2023.1017.2" />
     </ItemGroup>
 
     <ItemGroup>
         <Content Include="plugin.json" CopyToOutputDirectory="PreserveNewest" />
-        <PackageReference Include="ArtemisRGB.Plugins.BuildTask" Version="1.1.0" />
-        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.4" />
+        <PackageReference Include="ArtemisRGB.Plugins.BuildTask" Version="2.0.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.13" />
     </ItemGroup>
 </Project>

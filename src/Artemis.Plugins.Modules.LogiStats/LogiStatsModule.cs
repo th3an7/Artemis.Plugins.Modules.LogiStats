@@ -1,14 +1,13 @@
 using Artemis.Core.Modules;
 using Artemis.Plugins.Modules.LogiStats.DataModels;
 using Microsoft.Data.Sqlite;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using Swan;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace Artemis.Plugins.Modules.LogiStats;
 
@@ -68,18 +67,18 @@ public class LogiStatsModule : Module<LogiStatsDataModel>
             if (json is null)
                 return;
 
-            var jObject = JsonConvert.DeserializeObject<JObject>(json);
+            using var jObject = JsonSerializer.Deserialize<JsonDocument>(json);
             if (jObject is null)
                 return;
-
-            var batteryData = jObject.Properties()
+            
+            var batteryData = jObject.RootElement.EnumerateObject()
                                      .Where(p => p.Name.StartsWith("battery/"))
                                      .OrderBy(p => p.Name)
                                      .ToList();
 
             var percentages = batteryData
                 .Where(p => p.Name.EndsWith("percentage"))
-                .Select(j => (j.Name, j.Value.ToObject<BatteryPercentage>()));
+                .Select(j => (j.Name, j.Value.Deserialize<BatteryPercentage>()));
 
             foreach (var batteryPercentage in percentages)
             {
@@ -107,11 +106,7 @@ public class LogiStatsModule : Module<LogiStatsDataModel>
         connection.Open();
 
         var command = connection.CreateCommand();
-        command.CommandText =
-            @"
-                    SELECT file
-                    FROM data
-                    ";
+        command.CommandText = "SELECT file FROM data";
 
         using var reader = command.ExecuteReader();
         if (!reader.Read())

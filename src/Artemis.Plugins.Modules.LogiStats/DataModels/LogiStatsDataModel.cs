@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
-using System;
-using Artemis.Core.Modules;
-using System.Runtime.Serialization;
-using Newtonsoft.Json.Linq;
-using FluentAvalonia.Core;
+﻿using Artemis.Core.Modules;
 
 namespace Artemis.Plugins.Modules.LogiStats.DataModels;
 

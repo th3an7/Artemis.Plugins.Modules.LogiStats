@@ -14,7 +14,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '9.0.x'
 
       - name: Clone
         uses: actions/checkout@v2
@@ -26,4 +26,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Artemis.Plugins.Modules.LogiStats
-          path: src/Artemis.Plugins.Modules.LogiStats/bin/x64/Release/net8.0/publish
+          path: src/Artemis.Plugins.Modules.LogiStats/bin/x64/Release/net9.0/publish

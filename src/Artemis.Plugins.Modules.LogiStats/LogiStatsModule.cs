@@ -2,7 +2,6 @@ using Artemis.Core.Modules;
 using Artemis.Plugins.Modules.LogiStats.DataModels;
 using Microsoft.Data.Sqlite;
 using Serilog;
-using Swan;
 using System;
 using System.Collections.Generic;
 using System.IO;
